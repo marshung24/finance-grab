@@ -1,6 +1,6 @@
 {
     "name": "marshung/finance",
-    "description": "Mars`s finance plan",
+    "description": "Mars`s finance project",
     "homepage": "https://github.com/marshung24/finance",
     "type": "library",
     "license": "MIT",
@@ -13,5 +13,9 @@
     "autoload": {
         "psr-4": { "marshung\\finance\\": "src" }
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "marshung/autoloader": "^1.0"
+    }
 }
