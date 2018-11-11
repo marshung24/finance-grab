@@ -7,4 +7,16 @@ $g = new Grab();
 
 echo "<pre>";
 
-var_export($g->grab());
+$t1 = microtime(true);
+
+$data = $g->grab('2018-11-09', 'MS');
+
+
+$t2 = microtime(true);
+
+
+echo $t2 - $t1;
+echo "\n\n";
+
+
+var_export($data);

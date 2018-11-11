@@ -2,7 +2,8 @@
 namespace marshung\finance\tools;
 
 /**
- *
+ * 資料抓取工具函式庫
+ * 
  * @author Mars Hung
  *        
  */
@@ -41,7 +42,7 @@ class Curl
         
         // get資料處理
         $param = http_build_query($data);
-        $param = (strlen($param) ? '&' : '') . '_=' . $time;
+        $param .= (strlen($param) ? '&' : '') . '_=' . $time;
         
         // 串連網址
         $connSign = strpos($url, '?') ? '&' : '?';

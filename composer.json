@@ -1,7 +1,7 @@
 {
-    "name": "marshung/finance",
-    "description": "Mars`s finance project",
-    "homepage": "https://github.com/marshung24/finance",
+    "name": "marshung/financegrab",
+    "description": "Mars`s financegrab project",
+    "homepage": "https://github.com/marshung24/financegrab",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -11,11 +11,7 @@
         }
     ],
     "autoload": {
-        "psr-4": { "marshung\\finance\\": "src" }
+        "psr-4": { "marshung\\financegrab\\": "src" }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true,
-    "require": {
-        "marshung/autoloader": "^1.0"
-    }
-}
+    "prefer-stable": true
