@@ -6,12 +6,12 @@ finance
 
 # 安裝
 ```
-composer require marshung/finance
+composer require marsapp/finance
 ```
 
 # 使用
 ```
-$g = new \marshung\finance\Grab();
+$g = new \marsapp\grab\finance\Grab();
 
 $date = '2018-11-09';
 $type = 'MS';

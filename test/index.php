@@ -1,11 +1,14 @@
 <?php
 include_once ('../vendor/autoload.php');
 
-use marshung\finance\Grab;
+use marsapp\grab\finance\Grab;
 
 $g = new Grab();
 
 echo "<pre>";
+
+// $a = file_get_contents('https://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date=20181109&type=MS&_=1575086249135');
+// var_export($a);exit;
 
 $t1 = microtime(true);
 

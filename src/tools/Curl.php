@@ -1,5 +1,5 @@
 <?php
-namespace marshung\finance\tools;
+namespace marsapp\grab\finance\tools;
 
 /**
  * 資料抓取工具函式庫
@@ -10,7 +10,7 @@ namespace marshung\finance\tools;
 class Curl
 {
 
-    protected $_debug = false;
+    protected static $_debug = false;
     
     /**
      * Construct
@@ -19,22 +19,16 @@ class Curl
     {}
 
     /**
-     * Destruct
-     */
-    public function __destruct()
-    {}
-
-    /**
      * *********************************************
      * ************** Public Function **************
      * *********************************************
      */
-    public function post($url = '', $data = [])
+    public static function post($url = '', $data = [])
     {
-        return $this->send($url, $data = [], $method = 'POST');
+        return self::sendPost($url, $data);
     }
 
-    public function get($url = '', $data = [])
+    public static function get($url = '', $data = [])
     {
         // 取得時間 - 仿原介面jquery ajax - 防cache
         $t = explode('.', microtime(true));
@@ -48,14 +42,30 @@ class Curl
         $connSign = strpos($url, '?') ? '&' : '?';
         $url .= $connSign . $param;
         
-        return $this->sendGet($url);
+        return self::sendGet($url);
     }
 
-    public function send($url, $data = [], $method = 'GET')
-    {
-        return $this->sendGet($url);
-    }
-
+    
+    
+    /**
+     * **********************************************
+     * ************** Private Function **************
+     * **********************************************
+     */
+    
+    /**
+     * POST函式
+     *
+     * @param string $url
+     *            目標網址
+     * @param array $data
+     *            POST資料
+     * @return string 回傳值 json
+     */
+    protected static function sendPost($url, $data = [])
+    {}
+// https://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date=20181109&type=MS&_=1575092979293
+// https://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date=20191129&type=MS&_=1575093061501
     /**
      * GET函式
      *
@@ -65,14 +75,19 @@ class Curl
      *            是否使用Debug模式，預設false
      * @return mixed 回傳值 json
      */
-    public function sendGet($url)
+    protected static function sendGet($url)
     {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-        
-        if ($this->_debug) {
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36');
+        // curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); //強制協議為1.0
+        // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect: ')); //要送出'Expect: '
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 ); //強制使用IPV4協議解析域名
+
+        if (self::$_debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true); // cURL Debug
             curl_setopt($ch, CURLOPT_HEADER, true); // cURL Debug
             curl_setopt($ch, CURLINFO_HEADER_OUT, true);
@@ -98,7 +113,7 @@ class Curl
      *            
      * @return String 處理結果 json
      */
-    public function sample2($post_data, $url, $request, $accessToken)
+    private function sample2($post_data, $url, $request, $accessToken)
     {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -118,11 +133,5 @@ class Curl
         curl_close($ch);
         return $result;
     }
-
-/**
- * **********************************************
- * ************** Private Function **************
- * **********************************************
- */
     
 }

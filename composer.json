@@ -1,7 +1,7 @@
 {
-    "name": "marshung/financegrab",
+    "name": "marsapp/financegrab",
     "description": "Mars`s financegrab project",
-    "homepage": "https://github.com/marshung24/financegrab",
+    "homepage": "https://github.com/marshung24/finance-grab",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -11,7 +11,12 @@
         }
     ],
     "autoload": {
-        "psr-4": { "marshung\\financegrab\\": "src" }
+        "psr-4": { "marsapp\\grab\\finance\\": "src", "marsapp\\grab\\test\\finance\\": "test"}
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    "minimum-stability": "stable",
+    "require-dev": {
+        "marsapp/devtools": "*"
+    },
+    "require": {
+    }
+}

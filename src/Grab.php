@@ -1,43 +1,16 @@
 <?php
-namespace marsapp\grab\finance\source;
+namespace marsapp\grab\finance;
 
-use marsapp\grab\finance\tools\Curl;
+use marsapp\grab\finance\source\Twse;
 
 /**
- * 台灣證券交易所資料抓取函式庫
- * 
  * 
  * @author Mars Hung
- *        
+ *
  */
-class Twse
+class Grab
 {
-
-    /**
-     * 資料提供開始日
-     * @var string
-     */
-    protected static $dataStart = '2004-02-11';
     
-    /**
-     * 查詢網址格式樣版
-     * 
-     * @var array
-     */
-    protected static $_baseUrlTemplate = [
-        'base' => 'http://www.twse.com.tw/zh/',
-        'desc' => 'xxx年xx月xx日 大盤統計資訊',
-        'trading' => 'http://www.twse.com.tw/zh/page/trading/exchange/MI_INDEX.html',
-        'tradingajax' => [
-            'url' => 'http://www.twse.com.tw/exchangeReport/MI_INDEX',
-            'data' => [
-                'response' => 'json',
-                'date' => '',
-                'type' => '',
-            ]
-        ]
-    ];
-
     // 分類
     protected static $_type = [
         'MS' => '大盤統計資訊',
@@ -91,18 +64,22 @@ class Twse
         '20' => '其他',
     ];
     
+    
     /**
      * Construct
      */
     public function __construct()
-    {}
-
+    {
+        
+    }
+    
     /**
      * Destruct
      */
     public function __destruct()
     {}
-
+    
+    
     /**
      * *********************************************
      * ************** Public Function **************
@@ -110,52 +87,31 @@ class Twse
      */
     
     /**
-     * 抓取 TWSE 臺灣證券交易所資料
+     * 抓取股票交易資料
      * 
-     * @param string $date
-     * @param string $type
-     * @throws Exception
+     * @param string $date 目標日期
+     * @param string $type 資料類型
      * @return array|mixed
      */
-    public static function getTrading($date, $type)
+    public static function grab($date, $type)
     {
-        // 參數處理
-        $url = self::$_baseUrlTemplate['tradingajax']['url'];
-        $data = self::$_baseUrlTemplate['tradingajax']['data'];
-        $qDate = date('Ymd', strtotime($date));
-        
-        // 資料檢查 - 時間
-        if ($qDate < self::$dataStart) {
-            throw new Exception('Date Error: ' . var_export($date, 1), 400);
-        }
-        // 資料檢查 - 分類
-        if (! isset(self::$_type[$type])) {
-            throw new Exception('Type Error: ' . var_export($type, 1), 400);
-        }
-        
-        $data['date'] = $qDate;
-        $data['type'] = $type;
-        
-        // 抓取資料
-        $data = Curl::get($url, $data);
-        $data = json_decode($data, 1);
-        
-        return $data;
+        return Twse::getTrading($date, $type);
     }
     
     /**
-     * 取得資料類型
+     * 抓取股票交易資料類型
      * 
      * @return array
      */
     public static function getTypeList()
     {
-        return self::$_type;
+        return Twse::getTypeList();
     }
-
-/**
- * **********************************************
- * ************** Private Function **************
- * **********************************************
- */
+    
+    /**
+     * **********************************************
+     * ************** Private Function **************
+     * **********************************************
+     */
+    
 }

@@ -4,27 +4,28 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4046a068d1ec6c5bb5b1d09f910fa5c7",
-    "packages": [
+    "content-hash": "b4dfce18af02f51f284e66690c458fa0",
+    "packages": [],
+    "packages-dev": [
         {
-            "name": "marshung/autoloader",
-            "version": "1.0.4",
+            "name": "marsapp/devtools",
+            "version": "0.1.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/marshung24/autoloader.git",
-                "reference": "ef90c66b27cb4e348e312312f9a0ba67193b260b"
+                "url": "https://github.com/marshung24/DevTools.git",
+                "reference": "15cfb0eaf34a75fbc6dbb19b76c11757adc0715d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/marshung24/autoloader/zipball/ef90c66b27cb4e348e312312f9a0ba67193b260b",
-                "reference": "ef90c66b27cb4e348e312312f9a0ba67193b260b",
+                "url": "https://api.github.com/repos/marshung24/DevTools/zipball/15cfb0eaf34a75fbc6dbb19b76c11757adc0715d",
+                "reference": "15cfb0eaf34a75fbc6dbb19b76c11757adc0715d",
                 "shasum": ""
             },
             "type": "library",
             "autoload": {
-                "classmap": [
-                    "src/"
-                ]
+                "psr-4": {
+                    "marsapp\\dev\\tools\\": "src"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -36,15 +37,15 @@
                     "email": "tfaredxj@gmail.com"
                 }
             ],
-            "description": "Provides automatic loading of services during development",
-            "time": "2018-06-24T14:19:24+00:00"
+            "description": "Dev Tools",
+            "homepage": "https://github.com/marshung24/DevTools",
+            "time": "2019-03-28T15:18:10+00:00"
         }
     ],
-    "packages-dev": [],
     "aliases": [],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "stability-flags": [],
-    "prefer-stable": true,
+    "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": []
