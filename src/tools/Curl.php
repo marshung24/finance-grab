@@ -80,11 +80,13 @@ class Curl
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        // 網頁重導向
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36');
         // curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0); //強制協議為1.0
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect: ')); //要送出'Expect: '
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:')); //要送出'Expect: '
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 ); //強制使用IPV4協議解析域名
 
         if (self::$_debug) {
