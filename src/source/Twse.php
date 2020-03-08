@@ -23,7 +23,14 @@ class Twse
     protected static $dataStart = '2004-02-11';
 
     /**
+     * 暫存
+     */
+    protected static $_cache = [];
+
+    /**
      * 查詢網址格式樣版
+     * 
+     * Example: https://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date=20200227&type=ALLBUT0999&_=1583557018426
      * 
      * @var array
      */
@@ -41,7 +48,7 @@ class Twse
         ]
     ];
 
-    // 分類
+    // 查詢分類
     protected static $_type = [
         // 'MS' => '大盤統計資訊',
         // 'MS2' => '委託及成交統計資訊',
@@ -95,6 +102,17 @@ class Twse
     ];
 
     /**
+     * 資料分類
+     */
+    protected static $dataType = [
+        'transStatistic' => '大盤統計資訊',
+        'upDown' => '漲跌證券數合計',
+        'priceIndex' => '價格指數',
+        'rewardIndex' => '報酬指數',
+        'closingPrice' => '每日收盤行情',
+    ];
+
+    /**
      * *********************************************
      * ************** Public Function **************
      * *********************************************
@@ -131,11 +149,14 @@ class Twse
         $data = Curl::get($url, $data);
         $data = json_decode($data, 1);
 
+        // 原始資料整理
+        $data = self::prepare($data);
+        
         return $data;
     }
 
     /**
-     * 取得資料類型
+     * 取得資料查詢分類
      * 
      * @return array
      */
@@ -155,8 +176,137 @@ class Twse
     }
 
     /**
+     * 取得資料分類
+     * 
+     * @return array
+     */
+    public static function getDataType()
+    {
+        return self::$dataType;
+    }
+
+    /**
      * **********************************************
      * ************** Private Function **************
      * **********************************************
      */
+
+    /**
+     * 原始資料整理
+     * 
+     * @param array $data twse原始資料
+     * @return array $opt
+     */
+    protected static function prepare($data)
+    {
+        // 重建結構
+        $data = self::rebuildStructure($data);
+
+        // 分類資料整理
+        $data = self::typefilter($data);
+
+        return $data;
+    }
+
+
+    /**
+     * 重建結構
+     * 
+     * 輸出格式：
+     * $opt = [
+     *      'subtitle' => '',   // 標題
+     *      'type' => '',       // 分類
+     *      'data' => [],       // 資料
+     * ];
+     * 
+     * @param array $data twse原始資料
+     * @return array $opt
+     */
+    protected static function rebuildStructure($data)
+    {
+        $opt = [];
+
+        // 遍歷資料-重整資料結構
+        foreach ($data as $key => $row) {
+            if (strpos($key, 'subtitle') === 0) {
+                // 標題處理
+                $subtitle = trim(preg_replace('/[0-9]{2,3}年[0-9]{2}月[0-9]{2}日/', '', $row));
+                $count = trim(str_replace('subtitle', '', $key));
+
+                // 資料分類處理
+                $type = '';
+                foreach (self::$dataType as $code => $name) {
+                    if (strpos($subtitle, $name) === 0) {
+                        $type = $code;
+                        break;
+                    }
+                }
+
+                // 指數提供者
+                $provider = '';
+                if (in_array($type, ['priceIndex', 'rewardIndex'])) {
+                    $provider = preg_match('/\((.*)\)/', $subtitle, $matches) ? $matches[1] : '';
+                }
+
+                // 新結構-資料寫入
+                $opt[$count]['subtitle'] = $subtitle;
+                $opt[$count]['type'] = $type;
+                $opt[$count]['provider'] = $provider;
+            } elseif (strpos($key, 'data') === 0) {
+                // 資料內容處理
+                $count = trim(str_replace('data', '', $key));
+
+                // 新結構-資料寫入
+                $opt[$count]['data'] = $row;
+            }
+        }
+        ksort($opt);
+
+        return $opt;
+    }
+
+    /**
+     * 分類資料整理
+     *
+     * @param array $data
+     * @return void
+     */
+    protected static function typefilter(array $data)
+    {
+        foreach ($data as $key => &$row) {
+            switch ($row['type']) {
+                case 'transStatistic':
+                    // 大盤統計資訊
+                    break;
+                case 'upDown':
+                    // 漲跌證券數合計
+                    break;
+                case 'priceIndex':
+                    // 價格指數 - 移除漲跌欄中的html碼
+                    $row['data'] = array_map(function ($value) {
+                        isset($value[2]) && $value[2] = strip_tags($value[2]);
+                        isset($value[4]) && $value[4] = $value[4] === '--' ? '0' : $value[4];
+                        return $value;
+                    }, $row['data']);
+                    break;
+                case 'rewardIndex':
+                    // 報酬指數 - 移除漲跌欄中的html碼
+                    $row['data'] = array_map(function ($value) {
+                        isset($value[2]) && $value[2] = strip_tags($value[2]);
+                        isset($value[4]) && $value[4] = $value[4] === '--' ? '0' : $value[4];
+                        return $value;
+                    }, $row['data']);
+                    break;
+                case 'closingPrice':
+                    // 每日收盤行情 - 移除漲跌欄中的html碼
+                    $row['data'] = array_map(function ($value) {
+                        isset($value[9]) && $value[9] = strip_tags($value[9]);
+                        return $value;
+                    }, $row['data']);
+                    break;
+            }
+        }
+
+        return $data;
+    }
 }
