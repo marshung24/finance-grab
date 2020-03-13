@@ -12,7 +12,13 @@ echo "<pre>";
 
 $t1 = microtime(true);
 
-$data = $g->grab('2018-11-09', 'MS');
+// 抓取 TWSE 臺灣證券交易所資料
+// $data = $g->grab('2018-11-09', 'ALLBUT0999');
+
+// 抓取 道瓊工業平均指數 資料
+$data = $g->grabDjia('2020-03-12');
+
+
 
 
 $t2 = microtime(true);

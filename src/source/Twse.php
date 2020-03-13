@@ -134,7 +134,7 @@ class Twse
         $qDate = date('Ymd', strtotime($date));
 
         // 資料檢查 - 時間
-        if ($qDate < self::$dataStart) {
+        if ($date < self::$dataStart) {
             throw new Exception('Date Error: ' . var_export($date, 1), 400);
         }
         // 資料檢查 - 分類
