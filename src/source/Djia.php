@@ -49,6 +49,15 @@ class Djia
     /**
      * 抓取 道瓊工業平均指數 資料
      * 
+     * 
+     * 輸出格式：
+     * $opt[] = [
+     *      'open' => $number,
+     *      'high' => $number,
+     *      'low' => $number,
+     *      'close' => $number,
+     * ];
+     * 
      * @param string $date
      * @throws Exception
      * @return array|mixed
@@ -74,7 +83,7 @@ class Djia
 
         // 原始資料整理
         $data = self::prepare($data);
-        
+
         return $data;
     }
 
@@ -96,6 +105,14 @@ class Djia
 
     /**
      * 原始資料整理
+     * 
+     * 輸出格式：
+     * $opt[] = [
+     *      'open' => $number,
+     *      'high' => $number,
+     *      'low' => $number,
+     *      'close' => $number,
+     * ];
      * 
      * @param array $data twse原始資料
      * @return array $opt
