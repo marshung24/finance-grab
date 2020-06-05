@@ -16,9 +16,11 @@ $t1 = microtime(true);
 // $data = $g->grab('2018-11-09', 'ALLBUT0999');
 
 // 抓取 道瓊工業平均指數 資料
-$data = $g->grabDjia('2020-03-12');
+// $data = $g->grabDjia('2020-03-12');
 
 
+// 抓取 台灣證券交易所 三大法人買賣超日報
+$data = $g->grabTwseCorp3('2020-06-05');
 
 
 $t2 = microtime(true);

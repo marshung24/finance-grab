@@ -45,6 +45,15 @@ class Twse
                 'date' => '',
                 'type' => '',
             ]
+        ],
+        'corp3' => 'https://www.twse.com.tw/zh/page/trading/fund/T86.html',
+        'corp3ajax' => [
+            'url' => 'https://www.twse.com.tw/fund/T86',
+            'data' => [
+                'response' => 'json',
+                'date' => '',
+                'selectType' => 'ALLBUT0999',
+            ]
         ]
     ];
 
@@ -122,6 +131,28 @@ class Twse
         'closingPrice' => '每日收盤行情',
     ];
 
+    protected static $corp3TypeMap = [
+        '證券代號' => 's_code',
+        '證券名稱' => 's_name',
+        '外陸資買進股數(不含外資自營商)' => 'f_investor_buy',
+        '外陸資賣出股數(不含外資自營商)' => 'f_investor_sell',
+        '外陸資買賣超股數(不含外資自營商)' => 'f_investor_net_buy',
+        '外資自營商買進股數' => 'f_dealer_buy',
+        '外資自營商賣出股數' => 'f_dealer_sell',
+        '外資自營商買賣超股數' => 'f_dealer_net_buy',
+        '投信買進股數' => 'invest_buy',
+        '投信賣出股數' => 'invest_sell',
+        '投信買賣超股數' => 'invest_net_buy',
+        '自營商買賣超股數' => 'dealer_net_buy',
+        '自營商買進股數(自行買賣)' => 'dealer_s_buy',
+        '自營商賣出股數(自行買賣)' => 'dealer_s_sell',
+        '自營商買賣超股數(自行買賣)' => 'dealer_s_net_buy',
+        '自營商買進股數(避險)' => 'dealer_h_buy',
+        '自營商賣出股數(避險)' => 'dealer_h_sell',
+        '自營商買賣超股數(避險)' => 'dealer_h_net_buy',
+        '三大法人買賣超股數' => 'net_buy_sell',
+    ];
+
     /**
      * *********************************************
      * ************** Public Function **************
@@ -170,6 +201,43 @@ class Twse
 
         // 原始資料整理
         $data = self::prepare($data);
+
+        return $data;
+    }
+
+    /**
+     * 抓取 TWSE 臺灣證券交易所資料 三大法人買賣超日報
+     * 
+     * 輸出格式：
+     * $opt[] = [
+     *      'date' => '',       // 日期
+     *      'data' => [],       // 資料
+     * ];
+     * 
+     * @param string $date
+     * @throws Exception
+     * @return array|mixed
+     */
+    public static function getCorp3($date)
+    {
+        // 參數處理
+        $url = self::$_baseUrlTemplate['corp3ajax']['url'];
+        $data = self::$_baseUrlTemplate['corp3ajax']['data'];
+        $qDate = date('Ymd', strtotime($date));
+
+        // 資料檢查 - 時間
+        if ($date < self::$dataStart) {
+            throw new Exception('Date Error: ' . var_export($date, 1), 400);
+        }
+
+        $data['date'] = $qDate;
+
+        // 抓取資料
+        $data = Curl::get($url, $data);
+        $data = json_decode($data, 1);
+
+        // 原始資料整理
+        $data = self::prepareCorp3($data);
 
         return $data;
     }
@@ -340,5 +408,39 @@ class Twse
         }
 
         return $data;
+    }
+
+    /**
+     * 資料整理-三大法人買賣超日報
+     * 
+     * - 因取得資料時，欄位長度不定(值為0的有可能略過)，所以要轉換Key
+     * - 2014-11-28前後的資料格式不同
+     * 
+     * @param array $data twse原始資料
+     * @return array $opt
+     */
+    protected static function prepareCorp3($data)
+    {
+        $opt = [];
+
+        if (isset($data['data'])) {
+            $optData = [];
+
+            // 濾空白
+            foreach ($data['data'] as $key => $row) {
+                foreach ($row as $k => $v) {
+                    // 轉換key、濾空白
+                    $newKey = self::$corp3TypeMap[$data['fields'][$k]];
+                    $optData[$key][$newKey] = trim($v);
+                }
+            }
+
+            $opt = [
+                'date' => $data['date'],
+                'data' => $optData,
+            ];
+        }
+
+        return $opt;
     }
 }

@@ -79,6 +79,23 @@ class Grab
     }
 
     /**
+     * 抓取 台灣證券交易所 三大法人買賣超日報
+     * 
+     * 輸出格式：
+     * $opt[] = [
+     *      'date' => '',       // 日期
+     *      'data' => [],       // 資料
+     * ];
+     * 
+     * @param string $date 目標日期
+     * @return array|mixed
+     */
+    public static function grabTwseCorp3($date)
+    {
+        return Twse::getCorp3($date);
+    }
+
+    /**
      * 抓取股票交易資料類型
      * 
      * @return array
