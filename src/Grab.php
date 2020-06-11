@@ -96,6 +96,42 @@ class Grab
     }
 
     /**
+     * 抓取 開盤基準價、漲停、跌停
+     * 
+     * 輸出格式：
+     * $opt[] = [
+     *      'date' => '',       // 日期
+     *      'data' => [],       // 資料
+     * ];
+     * 
+     * @param string $date 目標日期
+     * @return array|mixed
+     */
+    public static function getTwseBasePrice($date)
+    {
+        return Twse::getBasePrice($date);
+    }
+
+    /**
+     * 抓取 鉅額交易日成交資訊-單一證券
+     * 
+     * 單一證券同一天可能有多筆
+     * 
+     * 輸出格式：
+     * $opt[] = [
+     *      'date' => '',       // 日期
+     *      'data' => [],       // 資料
+     * ];
+     * 
+     * @param string $date 目標日期
+     * @return array|mixed
+     */
+    public static function getTwseHugeTrans($date)
+    {
+        return Twse::getHugeTrans($date);
+    }
+
+    /**
      * 抓取股票交易資料類型
      * 
      * @return array

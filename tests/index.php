@@ -20,7 +20,13 @@ $t1 = microtime(true);
 
 
 // 抓取 台灣證券交易所 三大法人買賣超日報
-$data = $g->grabTwseCorp3('2020-06-05');
+// $data = $g->grabTwseCorp3('2020-06-05');
+
+// 抓取 開盤基準價、漲停、跌停
+// $data = $g->getTwseBasePrice('2020-12-17');
+
+// 抓取 鉅額交易日成交資訊-單一證券
+$data = $g->getTwseHugeTrans('2020-12-17');
 
 
 $t2 = microtime(true);

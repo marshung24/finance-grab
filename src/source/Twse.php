@@ -35,6 +35,7 @@ class Twse
      * @var array
      */
     protected static $_baseUrlTemplate = [
+        // 每日收盤行情
         'base' => 'https://www.twse.com.tw/zh/',
         'desc' => 'xxx年xx月xx日 大盤統計資訊',
         'trading' => 'https://www.twse.com.tw/zh/page/trading/exchange/MI_INDEX.html',
@@ -46,6 +47,7 @@ class Twse
                 'type' => '',
             ]
         ],
+        // 三大法人買賣超日報
         'corp3' => 'https://www.twse.com.tw/zh/page/trading/fund/T86.html',
         'corp3ajax' => [
             'url' => 'https://www.twse.com.tw/fund/T86',
@@ -54,7 +56,27 @@ class Twse
                 'date' => '',
                 'selectType' => 'ALLBUT0999',
             ]
-        ]
+        ],
+        // 股價升降幅度 - 抓取 開盤基準價、漲停、跌停
+        'basePrice' => 'https://www.twse.com.tw/zh/page/trading/exchange/TWT84U.html',
+        'basePriceAjax' => [
+            'url' => 'https://www.twse.com.tw/exchangeReport/TWT84U',
+            'data' => [
+                'response' => 'json',
+                'date' => '',
+                'selectType' => 'ALLBUT0999',
+            ]
+        ],
+        // 鉅額交易日成交資訊-單一證券
+        'hugeTrans' => 'https://www.twse.com.tw/zh/page/trading/block/BFIAUU.html',
+        'hugeTransAjax' => [
+            'url' => 'https://www.twse.com.tw/block/BFIAUU',
+            'data' => [
+                'response' => 'json',
+                'date' => '',
+                'selectType' => 'S',
+            ]
+        ],
     ];
 
     // 分類-資料查詢用
@@ -153,6 +175,23 @@ class Twse
         '三大法人買賣超股數' => 'net_buy_sell',
     ];
 
+    protected static $basePriceTypeMap = [
+        '證券代號' => 's_code',
+        '證券名稱' => 's_name',
+        '漲停價' => 'limit_up',
+        '開盤競價基準' => 'base_price',
+        '跌停價' => 'limit_down',
+    ];
+
+    protected static $hugeTransTypeMap = [
+        '證券代號' => 's_code',
+        '證券名稱' => 's_name',
+        '交易別' => 'trade_type',
+        '成交價' => 'trade_price',
+        '成交股數' => 'trade_count',
+        '成交金額' => 'trade_amount',
+    ];
+
     /**
      * *********************************************
      * ************** Public Function **************
@@ -238,6 +277,82 @@ class Twse
 
         // 原始資料整理
         $data = self::prepareCorp3($data);
+
+        return $data;
+    }
+
+    /**
+     * 抓取 開盤基準價、漲停、跌停
+     * 
+     * 輸出格式：
+     * $opt[] = [
+     *      'date' => '',       // 日期
+     *      'data' => [],       // 資料
+     * ];
+     * 
+     * @param string $date
+     * @throws Exception
+     * @return array|mixed
+     */
+    public static function getBasePrice($date)
+    {
+        // 參數處理
+        $url = self::$_baseUrlTemplate['basePriceAjax']['url'];
+        $data = self::$_baseUrlTemplate['basePriceAjax']['data'];
+        $qDate = date('Ymd', strtotime($date));
+
+        // 資料檢查 - 時間
+        if ($date < self::$dataStart) {
+            throw new Exception('Date Error: ' . var_export($date, 1), 400);
+        }
+
+        $data['date'] = $qDate;
+
+        // 抓取資料
+        $data = Curl::get($url, $data);
+        $data = json_decode($data, 1);
+
+        // 原始資料整理
+        $data = self::prepareBasePrice($data);
+
+        return $data;
+    }
+
+    /**
+     * 抓取 鉅額交易日成交資訊-單一證券
+     * 
+     * 單一證券同一天可能有多筆
+     * 
+     * 輸出格式：
+     * $opt[] = [
+     *      'date' => '',       // 日期
+     *      'data' => [],       // 資料
+     * ];
+     * 
+     * @param string $date
+     * @throws Exception
+     * @return array|mixed
+     */
+    public static function getHugeTrans($date)
+    {
+        // 參數處理
+        $url = self::$_baseUrlTemplate['hugeTransAjax']['url'];
+        $data = self::$_baseUrlTemplate['hugeTransAjax']['data'];
+        $qDate = date('Ymd', strtotime($date));
+
+        // 資料檢查 - 時間
+        if ($date < self::$dataStart) {
+            throw new Exception('Date Error: ' . var_export($date, 1), 400);
+        }
+
+        $data['date'] = $qDate;
+
+        // 抓取資料
+        $data = Curl::get($url, $data);
+        $data = json_decode($data, 1);
+
+        // 原始資料整理
+        $data = self::prepareHugeTrans($data);
 
         return $data;
     }
@@ -431,6 +546,70 @@ class Twse
                 foreach ($row as $k => $v) {
                     // 轉換key、濾空白
                     $newKey = self::$corp3TypeMap[$data['fields'][$k]];
+                    $optData[$key][$newKey] = trim($v);
+                }
+            }
+
+            $opt = [
+                'date' => $data['date'],
+                'data' => $optData,
+            ];
+        }
+
+        return $opt;
+    }
+
+    /**
+     * 資料整理-開盤基準價、漲停、跌停
+     * 
+     * @param array $data twse原始資料
+     * @return array $opt
+     */
+    protected static function prepareBasePrice($data)
+    {
+        $opt = [];
+
+        if (isset($data['data'])) {
+            $optData = [];
+
+            // 濾空白
+            foreach ($data['data'] as $key => $row) {
+                foreach ($row as $k => $v) {
+                    if ($k < sizeof(self::$basePriceTypeMap)) {
+                        // 轉換key、濾空白
+                        $newKey = self::$basePriceTypeMap[$data['fields'][$k]] ?? null;
+                        $optData[$key][$newKey] = trim($v);
+                    }
+                }
+            }
+
+            $opt = [
+                'date' => $data['date'],
+                'data' => $optData,
+            ];
+        }
+
+        return $opt;
+    }
+
+    /**
+     * 資料整理-鉅額交易日成交資訊-單一證券
+     * 
+     * @param array $data twse原始資料
+     * @return array $opt
+     */
+    protected static function prepareHugeTrans($data)
+    {
+        $opt = [];
+
+        if (isset($data['data'])) {
+            $optData = [];
+
+            // 濾空白
+            foreach ($data['data'] as $key => $row) {
+                foreach ($row as $k => $v) {
+                    // 轉換key、濾空白
+                    $newKey = self::$hugeTransTypeMap[$data['fields'][$k]] ?? null;
                     $optData[$key][$newKey] = trim($v);
                 }
             }
